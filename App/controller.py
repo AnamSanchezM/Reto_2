@@ -64,7 +64,7 @@ def loadData(control):
 
 def loadAmazon(catalog):   
 
-    servicefile1 = cf.data_dir + "amazon_prime_titles-utf8-large.csv"
+    servicefile1 = cf.data_dir + "amazon_prime_titles-utf8-small.csv"
     input_file1 = csv.DictReader(open(servicefile1, encoding='utf-8'))
     for program1 in input_file1:
         del(program1['description'])
@@ -73,7 +73,7 @@ def loadAmazon(catalog):
 
 def loadNetflix(catalog):
 
-    servicefile2 = cf.data_dir + "netflix_titles-utf8-large.csv"
+    servicefile2 = cf.data_dir + "netflix_titles-utf8-small.csv"
     input_file2 = csv.DictReader(open(servicefile2, encoding='utf-8'))
     for program2 in input_file2:
         del(program2['description'])
@@ -82,7 +82,7 @@ def loadNetflix(catalog):
 
 def loadHulu(catalog):
 
-    servicefile3 = cf.data_dir + "hulu_titles-utf8-large.csv"
+    servicefile3 = cf.data_dir + "hulu_titles-utf8-small.csv"
     input_file3 = csv.DictReader(open(servicefile3, encoding='utf-8'))
     for program3 in input_file3:
         del(program3['description'])
@@ -91,7 +91,7 @@ def loadHulu(catalog):
 
 def loadDisney(catalog):
 
-    servicefile4 = cf.data_dir + "disney_plus_titles-utf8-large.csv"
+    servicefile4 = cf.data_dir + "disney_plus_titles-utf8-small.csv"
     input_file4 = csv.DictReader(open(servicefile4, encoding='utf-8'))
     for program4 in input_file4:
         del(program4['description'])
@@ -124,6 +124,11 @@ def peliculasestrenadas(catalog, anio_int):
     
 def seriesestrenadas(catalog, fecha_b):
     return model.seriesestrenadas(catalog,fecha_b)
+
+def buscargenero(catalog, genero):
+    return model.buscar_genero(catalog,genero)
+def buscarTOPgenero(catalog,n):
+    return model.TOPnGenero(catalog,n)
 # Funciones que ayudan a sacar los 3 primeros y ultimos
 
 def primeros3a(catalog):

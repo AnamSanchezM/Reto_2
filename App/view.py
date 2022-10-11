@@ -43,7 +43,7 @@ def printMenu():
     print("1- Buscar las películas estrenadas en un año")
     print("2- Buscar programas de televisión agregados en una fecha determinada")
     #print("3- Contenido donde participa un actor")
-    #print("4- Contenido de un genero especifico")
+    print("4- Contenido de un genero especifico")
     #print("5- Contenido producido en un pais")
     #print("6- Contenido con un director involucrado")
     #print("7- Lista de los top con mas contenido")
@@ -105,6 +105,7 @@ while True:
         print("Cargando información de los archivos ....")
         loaddata(control)
 
+
         
         size_amazon = controller.sizeAmazon(control['model'])
         size_netflix = controller.sizeNetflix(control['model'])
@@ -112,6 +113,8 @@ while True:
         size_disney = controller.sizeDisney(control['model'])
 
         prim_ulti=controller.primeros3a(control['model']["total"])
+
+        
         
         
         primero = lt.getElement(prim_ulti[0],1)
@@ -163,12 +166,24 @@ while True:
     elif int(inputs[0]) == 2:
         fechab = input("Ingrese por favor la fecha de interes (yyyy-mm-dd)")
         l = controller.seriesestrenadas(catalog, fechab)
+        print(l)
         x_size = lt.size(l)
         print("="*10+"Requerimiento No. 1. Inputs"+"="*10)
 
         print("Movie released in the year: "+str(fechab))
 
         print("="*10+"Requerimiento No. 4. Answer"+"="*10)
+    
+    elif int(inputs[0]) == 4:
+        genero = input("Ingrese el genero que desea buscar: ")
+        l = controller.buscargenero(catalog,genero)
+        print(l)
+    
+    elif int(inputs[0]) == 7:
+        n = int(input("Ingrese el top:"))
+        l,size = controller.buscarTOPgenero(catalog,n)
+       
+       
 
         
         

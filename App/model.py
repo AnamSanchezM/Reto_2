@@ -58,6 +58,10 @@ def newCatalog():
     catalog['total'] = lt.newList("ARRAY_LIST",cmpByReleaseYear)
     catalog["años"] = mp.newMap(200,maptype="PROBING",loadfactor=0.5)
     catalog["datel"] = mp.newMap(8000, maptype = "PROBING", loadfactor=0.5)
+    catalog["genre"] = mp.newMap(100,maptype="PROBING",loadfactor=0.5)
+    
+
+    
 
     return catalog
 
@@ -77,6 +81,7 @@ def loadTotal(catalog):
         lt.addLast(catalog["total"], a)
         addmovieperyear(catalog,a)
         addtvshowperdate(catalog,a)
+        busqueda_genero(catalog,a)
 
     size_netflix = lt.size(catalog["Netflix"])
     for n in range(0, size_netflix):
@@ -85,6 +90,8 @@ def loadTotal(catalog):
         lt.addLast(catalog["total"], n)
         addmovieperyear(catalog,n)
         addtvshowperdate(catalog,n)
+        busqueda_genero(catalog,n)
+
 
     size_hulu=lt.size(catalog["Hulu"])
     for h in range(0, size_hulu):
@@ -93,6 +100,8 @@ def loadTotal(catalog):
         lt.addLast(catalog["total"], h)
         addmovieperyear(catalog,h)
         addtvshowperdate(catalog,h)
+        busqueda_genero(catalog,h)
+
     
     size_disney = lt.size(catalog["Disney"])
     for d in range(0,size_disney):
@@ -101,6 +110,9 @@ def loadTotal(catalog):
         lt.addLast(catalog["total"], d)
         addmovieperyear(catalog,d)
         addtvshowperdate(catalog,d)
+        busqueda_genero(catalog,d)
+    
+
     
     lista=mergesortyear(catalog["total"])
 
@@ -178,6 +190,19 @@ def newYear(rel_year):
 #================ Requerimiento 2 en el reto 2 ayuda a la carga de datos ==============================
    
 def addtvshowperdate(catalog,serie):
+    """
+    En la primera linea se pasa el mapa creado en el catalogo, se realiza un if para 
+    mirar si es una serie, luego lo que se hace es que se saca la info de la date_added
+    se pone en el formato para que retorne la fecha esperada luego se empiezan a agregar
+    en los diccionarios. 
+    Se espera que esta función haga un mapa con las fechas de las series y sea agregado
+    en el catalogo. 
+
+    Args:
+        catalog (_type_): catalogo creado donde esta la info
+        serie (_type_): es el contenido que se le pasa a la función para que en los ciclos
+        se genere la información
+    """
     mapa = catalog["datel"]
     if serie["type"]=="TV Show":
         
@@ -190,7 +215,7 @@ def addtvshowperdate(catalog,serie):
             if (fecha_f!= ''):
                 add_date = fecha_f
             else:
-                add_date = ""
+                add_date = 2020
             existyear = mp.contains(mapa, add_date)
             if existyear:
                 entry = mp.get(mapa, add_date)
@@ -199,7 +224,6 @@ def addtvshowperdate(catalog,serie):
                 date = newDate(add_date)
                 mp.put(mapa, add_date, date)
             lt.addLast(date['series'], serie)
-
 
 def newDate(add_date):
     """
@@ -210,6 +234,79 @@ def newDate(add_date):
     entry['date'] = add_date
     entry['series'] = lt.newList('ARRAY_LIST', cmpBytitle)
     return entry
+
+#======================= Requerimiento 4 en el reto 2 ayuda a la carga de datos ==============================
+def busqueda_genero(catalog,content):
+    """
+
+    Args:
+        catalog (_type_): _description_
+        content (_type_): _description_
+    """
+    mapa_genero=catalog["genre"]
+    if (content['listed_in'] != ''):
+        list_genero = content["listed_in"].split(",")
+     
+        for i in list_genero:  
+            i= i.strip()  
+            existgenre = mp.contains(mapa_genero, i)
+            if existgenre:
+                entry = mp.get(mapa_genero, i)
+                valor = me.getValue(entry)
+            else:
+                valor = newgenero(i)
+                mp.put(mapa_genero, i, valor)
+            lt.addLast(valor['contenido'], content)
+            mapa_contadores=valor["contadores"]
+            contador_general=me.getValue(mp.get(mapa_contadores,"contenido_total"))+1
+            mp.put(mapa_contadores,"contenido_total",contador_general)
+            if content["type"] == "Movie":
+                contador=me.getValue(mp.get(mapa_contadores,"Peli"))+1
+                mp.put(mapa_contadores,"Peli",contador)
+
+            elif content["type"] == "TV Show":
+                contador=me.getValue(mp.get(mapa_contadores,"Serie"))+1
+                mp.put(mapa_contadores,"Serie",contador)
+            
+            if content["platform"]=="Amazon":
+                contador=me.getValue(mp.get(mapa_contadores,"Amazon"))+1
+                mp.put(mapa_contadores,"Amazon",contador)
+            
+            if content["platform"]=="Netflix":
+                contador=me.getValue(mp.get(mapa_contadores,"Netflix"))+1
+                mp.put(mapa_contadores,"Netflix",contador) 
+            
+            if content["platform"]=="Hulu":
+                contador=me.getValue(mp.get(mapa_contadores,"Hulu"))+1
+                mp.put(mapa_contadores,"Hulu",contador) 
+
+            if content["platform"]=="Disney":
+                contador=me.getValue(mp.get(mapa_contadores,"Disney"))+1
+                mp.put(mapa_contadores,"Disney",contador) 
+
+
+def newgenero(genre):
+    """
+    Esta funcion crea la estructura de peliculas asociados
+    a un año.
+    """
+    entry = {'genero': "", "contenido": None, "contadores" : None}
+    entry["contadores"] = mp.newMap(10,maptype="PROBING",loadfactor=0.5)
+    entry['genero'] = genre
+    entry['contenido'] = lt.newList('ARRAY_LIST', cmpBytitle)
+    mp.put(entry["contadores"],"contenido_total",0)
+    mp.put(entry["contadores"],"Peli",0)
+    mp.put(entry["contadores"],"Serie",0)
+    mp.put(entry["contadores"],"Amazon",0)
+    mp.put(entry["contadores"],"Netflix",0)
+    mp.put(entry["contadores"],"Hulu",0)
+    mp.put(entry["contadores"],"Disney",0)
+
+
+    
+    return entry
+
+
 # Funciones para creacion de datos
 
 #Desde la función amazonSize, hasta Disneysize, calculamos los size de los catalogos de cada plataforma
@@ -242,19 +339,84 @@ def peliculasestrenadas(catalog, anio_int):
     
     return listed_list
 
-#REQUERIMIENTO 2
+#REQUERIMIENTO 2 ======== NO ESTÁ COMPILANDO LA INFORMACIÓN
 
 def seriesestrenadas(catalog, fecha_b):
     
     l = mp.get(catalog["datel"],fecha_b)
     
-    #l = me.getValue(l)
-    #l = l["series"]
+    l = me.getValue(l)
+    l = l["series"]
 
-    #listed_list = mg.sort(l, cmpBytitle)
+    listed_list = mg.sort(l, cmpBytitle)
     
-    print (l) #listed_list
+    return listed_list
 
+
+#REQUERIMIENTO 4 
+
+def buscar_genero(catalog, genero):
+    """_summary_
+
+    Args:
+        catalog (_type_): _description_
+        genero (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    l = mp.get(catalog["genre"],genero)
+    l = me.getValue(l)
+    lista = l["contenido"]
+    print(l["contadores"])
+    
+    listed_list = mg.sort(lista, cmpBytitle)
+    
+            
+    return listed_list,me.getValue(mp.get(l["contadores"],"Peli")),me.getValue(mp.get(l["contadores"],"Serie"))
+
+
+#Requerimiento 7
+
+def TOPnGenero(catalog,n):
+    """
+    En esta función se genera un diccionario con la siguiente estructura
+    dict_resultado= {"genre_1: ": {"count":#, "typeMovie":# , "typeSerie":#, "Platforms": {} }, "genre_2": {...}}
+    Args:
+        catalog (_type_): _description_
+        n (_type_): _description_
+    """
+    
+    
+    lista=mp.valueSet(catalog["genre"])
+    
+    sorted_list=mg.sort(lista, cmpGenero)
+    sub_list=lt.subList(sorted_list, 1,n)
+    for i in lt.iterator(sub_list):
+        print(i["genero"],me.getValue(mp.get(i["contadores"],"contenido_total")))
+    
+    return sub_list,lt.size(sorted_list)
+def cmpGenero(elemento1,elemento2):
+    contador_general1=me.getValue(mp.get(elemento1["contadores"],"contenido_total"))
+    contador_general2=me.getValue(mp.get(elemento2["contadores"],"contenido_total"))
+    return contador_general1>contador_general2
+def complementTOPnGenero(s,estructura_datos, i):
+    """
+    En esta función se analiza un elemento en específico y se asignan 
+    los valores a la tabla hash hecha previamente
+    """
+    
+    #Primero analizo el tipo (si serie o película)
+    if i["type"]=="Movie":
+        estructura_datos[s]["typeMovie"]+=1
+    elif i["type"]=="TV Show":
+        estructura_datos[s]["typeSerie"]+=1
+    #Si es otro no lo tengo en cuenta!
+
+    #A partir de acá analizo el tipo de plataforma
+    platform = i["platform"]
+    estructura_datos[s]["Platforms"][platform]+=1
+    
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
