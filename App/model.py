@@ -368,12 +368,10 @@ def buscar_genero(catalog, genero):
     l = mp.get(catalog["genre"],genero)
     l = me.getValue(l)
     lista = l["contenido"]
-    print(l["contadores"])
     
-    listed_list = mg.sort(lista, cmpBytitle)
-    
-            
-    return listed_list,me.getValue(mp.get(l["contadores"],"Peli")),me.getValue(mp.get(l["contadores"],"Serie"))
+    listed_list = mg.sort(lista, cmpreq4)
+        
+    return listed_list, me.getValue(mp.get(l["contadores"],"Peli")),me.getValue(mp.get(l["contadores"],"Serie"))
 
 
 #Requerimiento 7
@@ -392,14 +390,15 @@ def TOPnGenero(catalog,n):
     
     sorted_list=mg.sort(lista, cmpGenero)
     sub_list=lt.subList(sorted_list, 1,n)
-    for i in lt.iterator(sub_list):
-        print(i["genero"],me.getValue(mp.get(i["contadores"],"contenido_total")))
     
+        
     return sub_list,lt.size(sorted_list)
+
 def cmpGenero(elemento1,elemento2):
     contador_general1=me.getValue(mp.get(elemento1["contadores"],"contenido_total"))
     contador_general2=me.getValue(mp.get(elemento2["contadores"],"contenido_total"))
     return contador_general1>contador_general2
+
 def complementTOPnGenero(s,estructura_datos, i):
     """
     En esta función se analiza un elemento en específico y se asignan 
@@ -448,8 +447,25 @@ def cmpByReleaseYear(content1, content2):
     
     else: 
         return False
+    
+def cmpreq4(content1,content2):
+    if float(content1["release_year"]) < float(content2["release_year"]):
+        return True
+    elif float(content1["release_year"]) == float(content2["release_year"]):
+        a=(content1['title'].lower().strip()) 
+        b=(content2["title"].lower().strip())
+        if a < b:
+            return True
+        elif  a == b:
+            return int(content1["duration"]) < int(content2["duration"])
+
+    else:
+        return False
+
+
 
 def cmpBytitle(content1,content2):
+
     """
     Devuelve True si el titulo del contenido 1 son menores que el titulo del segundo contenido,
     en caso de ser iguales se debe dirigir a comprarar las duraciones de los 2 contenidos, y en 

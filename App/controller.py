@@ -126,8 +126,11 @@ def seriesestrenadas(catalog, fecha_b):
     return model.seriesestrenadas(catalog,fecha_b)
 
 def buscargenero(catalog, genero):
-    return model.buscar_genero(catalog,genero)
+    l,cp,cs = model.buscar_genero(catalog,genero)
+    return l,cp,cs
+
 def buscarTOPgenero(catalog,n):
+
     return model.TOPnGenero(catalog,n)
 # Funciones que ayudan a sacar los 3 primeros y ultimos
 
@@ -137,3 +140,6 @@ def primeros3a(catalog):
     luego de eso, se genera una tupla para que pase al view  y se vea en la tabla.
     """
     return (model.primeros_3a(catalog), model.ultimos(catalog))
+
+def menores3(catalog):
+    return (model.ultimos(catalog))

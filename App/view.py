@@ -27,6 +27,8 @@ from DISClib.ADT import list as lt
 assert cf
 from tabulate import tabulate
 import datetime as dt
+from DISClib.ADT import map as mp
+from DISClib.DataStructures import mapentry as me
 
 
 
@@ -46,7 +48,7 @@ def printMenu():
     print("4- Contenido de un genero especifico")
     #print("5- Contenido producido en un pais")
     #print("6- Contenido con un director involucrado")
-    #print("7- Lista de los top con mas contenido")
+    print("7- Lista de los top con mas contenido")
     #print("8- seleccionar el tipo de representacion de la lista")
 
 catalog = None
@@ -68,6 +70,59 @@ control = newController()
 catalog = control['model']
 
 #El código se encarga de imprimir los tres primeros elementos y los ultimos 3 elementos de cada requerimiento 
+
+def tabulateTopGenre(list,n,size):
+    print("=============Req No 7. (BONUS) Answer=============")
+    print("There are '"+str(size)+"' genres participating for the TOP '"+str(n)+"' genres in 'listed_in'")
+    print("=============The TOP '"+str(n)+"' genres are: =============")
+    table_size_header = ["count","listed_in"]
+    table_size_content = []
+    for i in lt.iterator(list):
+        nueva=[]
+        x=me.getValue(mp.get(i["contadores"],"contenido_total"))
+        nueva.append(x)
+        nueva.append(i["genero"])
+        table_size_content.append(nueva)
+    print(tabulate(table_size_content, headers=table_size_header, tablefmt="grid"))
+    print("=============TOP genres participation in each platform=============")
+    print("There are only '"+str(size)+"' genres participating for the TOP")
+    table_size_header = ["rank","count","listed_in","type","stream_service"]
+    """"
+    structure of the dictionary
+        En esta función se genera un diccionario con la siguiente estructura
+    dict_resultado= {"genre_1: ": {"count":#, "typeMovie":# , "typeSerie":#, "Platforms": {} }, "genre_2": {...}}
+    """
+    table_size_content = []
+    contador=1
+    for i in lt.iterator(list):
+        lista=[]
+        x=me.getValue(mp.get(i["contadores"],"contenido_total"))
+        peliculas=me.getValue(mp.get(i["contadores"],"Peli"))
+        series=me.getValue(mp.get(i["contadores"],"Serie"))
+        lista.append(contador)
+        lista.append(x)
+        lista.append(i["genero"])
+        table_size_header2=["count\ntype",""]
+        table_size_content2=[]
+        table_size_content2.append(["Movie",peliculas])
+        table_size_content2.append(["TV Show",series])
+        lista.append(tabulate(table_size_content2, headers=table_size_header2, tablefmt="plain"))
+        table_size_header3=["count\nstreamService",""]
+        table_size_content3=[]
+        amazon=me.getValue(mp.get(i["contadores"],"Amazon"))
+        netflix=me.getValue(mp.get(i["contadores"],"Netflix"))
+        hulu=me.getValue(mp.get(i["contadores"],"Hulu"))
+        disney=me.getValue(mp.get(i["contadores"],"Disney"))
+
+        table_size_content3.append(["Amazon",amazon])
+        table_size_content3.append(["Netflix",netflix])
+        table_size_content3.append(["Hulu",hulu])
+        table_size_content3.append(["Disney",disney])
+        
+        lista.append(tabulate(table_size_content3, headers=table_size_header3, tablefmt="plain"))
+        table_size_content.append(lista)
+        contador+=1
+    print(tabulate(table_size_content, headers=table_size_header, tablefmt="grid"))
 
 def impresionPrimerosUltimos(a):
     primero = lt.getElement(a[0],1)
@@ -104,22 +159,13 @@ while True:
     if int(inputs[0]) == 0:
         print("Cargando información de los archivos ....")
         loaddata(control)
-
-
-        
         size_amazon = controller.sizeAmazon(control['model'])
         size_netflix = controller.sizeNetflix(control['model'])
         size_hulu = controller.sizeHulu(control['model'])
         size_disney = controller.sizeDisney(control['model'])
-
         prim_ulti=controller.primeros3a(control['model']["total"])
-
-        
-        
         
         primero = lt.getElement(prim_ulti[0],1)
-        
-
         num=size_amazon+size_disney+size_hulu+size_netflix
         tamaño=len(primero)
 
@@ -157,31 +203,74 @@ while True:
 
         print("Movie released in the year: "+str(anio_int))
 
-        print("="*10+"Requerimiento No. 4. Answer"+"="*10)
+        print("="*10+"Requerimiento No. 1. Answer"+"="*10)
 
-        
+        print("There are only "+str(x_size)+" IPs (Intelectual Properties in movie type released in the year "+ str(anio_int))
+
         x1=controller.primeros3a(l)
-        print(x1)
+        impresionPrimerosUltimos(x1)
+
+       
+        
     
     elif int(inputs[0]) == 2:
         fechab = input("Ingrese por favor la fecha de interes (yyyy-mm-dd)")
         l = controller.seriesestrenadas(catalog, fechab)
-        print(l)
+        
         x_size = lt.size(l)
-        print("="*10+"Requerimiento No. 1. Inputs"+"="*10)
 
-        print("Movie released in the year: "+str(fechab))
+        
+        print("="*10+"Requerimiento No. 2. Inputs"+"="*10)
 
-        print("="*10+"Requerimiento No. 4. Answer"+"="*10)
+        print("TV show released in the date: "+str(fechab))
+
+        print("="*10+"Requerimiento No. 2. Answer"+"="*10)
+
+        print("There are only "+str(x_size)+" IPs (Intelectual Properties) in the date "+ str(fechab))
+
+        x1=controller.primeros3a(l)
+        impresionPrimerosUltimos(x1)
+
+
     
     elif int(inputs[0]) == 4:
         genero = input("Ingrese el genero que desea buscar: ")
-        l = controller.buscargenero(catalog,genero)
-        print(l)
+
+        print("="*10+"Requerimiento No. 4. Inputs"+"="*10)
+
+        print("the content is Listed_In "+genero)
+
+        print("="*10+"Requerimiento No. 4. Answer"+"="*10)
+
+        print("-"*10+ genero+"content type count")
+
+        l,cp,cs = controller.buscargenero(catalog,genero)
+
+        table_size_content = [
+            ["Peliculas", cp],
+            ["Series", cs]
+        ]
+        table_size_header = [
+            "Type", "Amount"
+        ]
+
+        print(
+            tabulate(table_size_content, headers=table_size_header,tablefmt="grid")
+        )
+
+        print("There are "+str(lt.size(l))+" IPs (Intelectual Properties) with the "+ genero + " label.")
+
+        x1=controller.primeros3a(l)
+        impresionPrimerosUltimos(x1)
+
+        
     
     elif int(inputs[0]) == 7:
         n = int(input("Ingrese el top:"))
         l,size = controller.buscarTOPgenero(catalog,n)
+        tabulateTopGenre(l,n,size)
+        
+        
        
        
 
